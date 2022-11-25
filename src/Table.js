@@ -16,7 +16,7 @@ const TableBody = (props) => {
             {props.data.map((d, index) => {
                 return (
                     <tr key={d.id ?? index} onClick={() => props.removeData(index)}>
-                        {props.keys.map(key => <td key={d[key]}> {d[key]} </td>)}
+                        {props.keys.map(key => <td key={d[key]} name={d[key]}> <div> {d[key]} </div> </td>)}
                     </tr>
                 )
             })}

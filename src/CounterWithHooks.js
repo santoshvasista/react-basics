@@ -8,6 +8,7 @@ function CounterWithHooks() {
     // TODO: This reset is not working
     // const reset = () => {
     //     setValue(0);
+    //     setMaxValue(10);
     //     setIsIncrementDisabled(false);
     //     setIsDecrementDisabled(false);
     // }

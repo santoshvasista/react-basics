@@ -1,4 +1,4 @@
-import React, { Component, useRef, PureComponent } from 'react';
+import React, { Component } from 'react';
 import "./App.css";
 import Counter from "./Counter";
 import Jobs from "./Jobs";
@@ -14,6 +14,9 @@ import TemperatureCalculatorWithHooks from './TemperatureCalculatorWithHooks';
 import FetchComponent from './FetchComponent';
 import Spacer from './Spacer';
 
+// [TODO]: Pending Application
+// 1) Using redux
+// 2) Uber application
 
 // TODO: Other questions
 // How frequently we use other hooks (not useState nor useEffect ) in our application
@@ -24,13 +27,13 @@ import Spacer from './Spacer';
 class App extends Component {
 
     counter = React.createRef();
-    // counterWithHooks = React.createRef();
+    // counterWithHooks = React.createRef();q
     // counterWithReducerHooks = React.createRef();
     jobs = React.createRef();
     resetApplication = () => {
         this.counter.current.reset();
-        this.counterWithReducerHooks.current.reset();
-        this.counterWithHooks.current.reset();
+        // this.counterWithReducerHooks.current.reset();
+        // this.counterWithHooks.current.reset();
         this.jobs.current.reset();
     }
     render() {

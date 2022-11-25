@@ -6,9 +6,12 @@ const FetchResultsComponent = (props) => {
     const [value, setValue] = useState("");
     const [data, setData] = useState(props.data ?? []);
     const [searchKey, setSearchKey] = useState(props.keys[0]);
+    const [timer, setTimer] = useState(null);
+    const debounceInterval = 1000;
     useEffect(() => {
         setSearchKey(props?.keys[0]);
     }, [props.keys]);
+
     const handleInput = (event) => {
         if (!searchKey) {
             return;
@@ -23,13 +26,26 @@ const FetchResultsComponent = (props) => {
         // setData(props.data.filter(d => d.body.includes(value)));
     }
     // TODO: Option 2 - which one is better?
+
     useEffect(() => {
+        if (timer) {
+            clearTimeout(timer);
+        }
+        const _timer = setTimeout(() => {
+            filterData();
+            setTimer(null);
+        }, debounceInterval);
+        setTimer(_timer);
+    }, [props.data, value, searchKey]);
+
+    const filterData = () => {
         if (!value || !searchKey) {
             setData(props.data);
             return;
         }
         setData(props.data.filter(d => d?.[searchKey]?.toString()?.includes(value)));
-    }, [props.data, value, searchKey]);
+    }
+
     const handleSelect = (event) => {
         setSearchKey(event.target.value);
     }
@@ -41,9 +57,9 @@ const FetchResultsComponent = (props) => {
                     {props.keys.map(key => <option key={key} value={key} name={key}> {key} </option>)}
                 </select>
                 <input type="text" value={value} onChange={handleInput} />
-                 {data.length} results found
+                {data.length} results found
             </div>
-            <Table 
+            <Table
                 data={data}
                 removeData={props.removeData}
                 keys={props.keys}
@@ -64,51 +80,41 @@ const FetchResultsComponent = (props) => {
 
 // TODO: Pending items:
 // 1) Hightlight Search key or term
-// 1) Update refresh status to interval of 1 second - not working
-// 1) Data as '/n' in it. So when I tried to search with sentence - it is not working.
+// 2) Data as '/n' in it. So when I tried to search with sentence - it is not working.
 // How can I make sure it works with '/n'?
 const FetchComponent = (props) => {
     const [data, setData] = useState([]);
     const [date, setDate] = useState(new Date());
     const [isRefreshEnabled, setIsRefreshEnabled] = useState(true);
     const [keys, setKeys] = useState([]);
-    const timerInSeconds = 15;
-    // const [pendingTimer, setPendingTimer] = useState(timerInSeconds);
+    const timerInSeconds = 3;
+     const [pendingTimer, setPendingTimer] = useState(timerInSeconds);
 
     // fetch data
     useEffect(() => {
-        const {url} = props;
-        fetch(url)
+        fetch(props.url)
             .then(response => response.json())
             .then(response => {
                 setData(response);
                 setKeys(Object.keys(response?.[0]))
                 setIsRefreshEnabled(false);
+                setPendingTimer(timerInSeconds);
             });
     }, [props.url, date]);
 
-    // refresh button logic
     useEffect(() => {
-        const timer = setTimeout(() => {
+        if (pendingTimer === 0) {
             setIsRefreshEnabled(true);
-        }, timerInSeconds*1000);
-
-        // const timerPending = setInterval(() => {
-        //     setPendingTimer(pendingTimer - 1);
-        //     if (pendingTimer === 0) {
-        //         clearInterval(timerPending);
-        //     }
-        // }, 1000);
-
-        return (() => {
-            clearTimeout(timer);
-            // clearInterval(timerPending);
-        })
-    }, [isRefreshEnabled]);
-
+        }
+        if (pendingTimer > 0) {
+            setTimeout(() => {
+                setPendingTimer(pendingTimer - 1);
+            }, 1000)
+        }
+    }, [pendingTimer])
 
     const removeData = (index) => {
-        setData(data.filter((_, i) => i!== index));
+        setData(data.filter((_, i) => i !== index));
         setIsRefreshEnabled(true);
     }
     const updateDate = () => {
@@ -117,14 +123,13 @@ const FetchComponent = (props) => {
     return (
         <>
             <button onClick={updateDate} disabled={!isRefreshEnabled}> Refresh API </button>
-            { !isRefreshEnabled && <span> Refresh disabled for {timerInSeconds} seconds </span> }
+            {!isRefreshEnabled && <span> Refresh disabled for {pendingTimer} seconds </span>}
             <div>
-                <b>Refreshed at { date.toLocaleTimeString()} </b>
+                <b>Refreshed at {date.toLocaleTimeString()} </b>
             </div>
             <Spacer margin='8' />
-            <FetchResultsComponent 
+            <FetchResultsComponent
                 data={data}
-                // date={date}
                 removeData={removeData}
                 keys={keys}
             />
